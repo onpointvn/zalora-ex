@@ -42,4 +42,44 @@ defmodule Zalora.Client do
       {:ok, Tesla.client(middlewares ++ config.middlewares)}
     end
   end
+
+  @doc """
+  Perform a GET request
+
+    get("/users")
+    get("/users", query: [scope: "admin"])
+    get(client, "/users")
+    get(client, "/users", query: [scope: "admin"])
+    get(client, "/users", body: %{name: "Jon"})
+  """
+  @spec get(Tesla.Client.t(), String.t(), keyword()) :: {:ok, any()} | {:error, any()}
+  def get(client, path, opts \\ []) do
+    client
+    |> Tesla.get(path, [{:opts, [api_name: path]} | opts])
+    |> process()
+  end
+
+  defp process(response) do
+    module =
+      Application.get_env(:zalora, :config, [])
+      |> Keyword.get(:response_handler, __MODULE__)
+
+    module.handle_response(response)
+  end
+
+  @doc """
+  Default response handler for request, user can customize by pass custom module in config
+  """
+  def handle_response(response) do
+    case response do
+      {:ok, %{body: body, status: 200}} ->
+        {:ok, body}
+
+      {:ok, %{body: body}} ->
+        {:error, body}
+
+      {_, _result} ->
+        {:error, %{type: :system_error, response: response}}
+    end
+  end
 end
