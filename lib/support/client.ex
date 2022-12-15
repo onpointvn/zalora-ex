@@ -1,6 +1,33 @@
 defmodule Zalora.Client do
+  @moduledoc """
+  Process and sign data before sending to Zalora and process response from Zalora server
+  Proxy could be config
+    config :zalora, :config,
+      proxy: "http://127.0.0.1:9090",
+      api_url: "",
+      timeout: 10_000,
+      response_handler: MyModule,
+      middlewares: [] # custom middlewares
+  Your custom reponse handler module must implement `handle_response/1`
+  """
   alias Zalora.Helpers
 
+  @doc """
+  Create a new client with given API information.
+  API information can be set using config.
+    config :zalora, :config,
+      api_url: "",
+      timeout: 60,
+      middlewares: []
+
+  Or could be pass via `opts` argument
+
+  **Options**
+  - `api_url[string]`: The API URL
+  - `use_form_url_encoded[boolean]`: Make the API client uses form URL encoded content type to post payload.
+  - `access_token[string]`: Make the API client decorates access token for each request.
+  """
+  @spec new(opts :: Keyword.t()) :: {:ok, Tesla.Client.t()} | {:error, String.t()}
   def new(opts \\ []) do
     config = Zalora.Helpers.get_config()
 
@@ -26,10 +53,18 @@ defmodule Zalora.Client do
 
       middlewares = [
         {Tesla.Middleware.BaseUrl, api_url},
-        {Tesla.Middleware.Opts, options},
-        # Zalora.Middleware.Authentication,
-        Tesla.Middleware.JSON
+        {Tesla.Middleware.Opts, options}
       ]
+
+      middlewares =
+        if opts[:use_form_url_encoded] == true do
+          middlewares ++ [Tesla.Middleware.FormUrlencoded]
+        else
+          middlewares
+        end
+
+      # For extracting response
+      middlewares = middlewares ++ [Tesla.Middleware.JSON]
 
       # if config setting timeout, otherwise use default settings
       middlewares =
@@ -81,5 +116,20 @@ defmodule Zalora.Client do
       {_, _result} ->
         {:error, %{type: :system_error, response: response}}
     end
+  end
+
+  @doc """
+  Perform a POST request.
+
+    post("/users", %{name: "Jon"})
+    post("/users", %{name: "Jon"}, query: [scope: "admin"])
+    post(client, "/users", %{name: "Jon"})
+    post(client, "/users", %{name: "Jon"}, query: [scope: "admin"])
+  """
+  @spec post(Tesla.Client.t(), String.t(), any(), keyword()) :: {:ok, any()} | {:error, any()}
+  def post(client, path, body, opts \\ []) do
+    client
+    |> Tesla.post(path, body, [{:opts, [api_name: path]} | opts])
+    |> process()
   end
 end
