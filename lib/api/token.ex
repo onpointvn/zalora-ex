@@ -34,7 +34,19 @@ defmodule Zalora.Token do
     with {:ok, payload} <- Contrak.validate(params, @request_access_token_schema),
          {:ok, client} <- Client.new(opts) do
       payload = Map.put(payload, :grant_type, "client_credentials")
-      Client.post(client, "/oauth/client-credentials", payload)
+
+      client
+      |> Client.post("/oauth/client-credentials", payload)
+      |> case do
+        {:ok, %{"access_token" => _, "expires_in" => _, "token_type" => _}} = result ->
+          result
+
+        {:ok, data} ->
+          {:error, data}
+
+        error ->
+          error
+      end
     end
   end
 end
