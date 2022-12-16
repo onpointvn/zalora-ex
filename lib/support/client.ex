@@ -10,7 +10,6 @@ defmodule Zalora.Client do
       middlewares: [] # custom middlewares
   Your custom reponse handler module must implement `handle_response/1`
   """
-  alias Zalora.Helpers
 
   @doc """
   Create a new client with given API information.
@@ -39,21 +38,22 @@ defmodule Zalora.Client do
       end
 
     api_url = opts[:api_url] || config.api_url
-    # access_token = opts[:access_token]
+    access_token = opts[:access_token]
 
     if is_nil(api_url) do
       {:error, "Missing api_url in configuration"}
     else
       options = [
-        adapter: proxy_adapter
-        # access_token: access_token
+        adapter: proxy_adapter,
+        access_token: access_token
       ]
 
-      options = Helpers.clean_nil(options)
+      options = Zalora.MapHelper.clean_nil(options)
 
       middlewares = [
         {Tesla.Middleware.BaseUrl, api_url},
-        {Tesla.Middleware.Opts, options}
+        {Tesla.Middleware.Opts, options},
+        Zalora.Middleware.Authentication
       ]
 
       middlewares =
