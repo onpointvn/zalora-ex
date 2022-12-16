@@ -77,7 +77,7 @@ defmodule Zalora.ProductSet do
   alias Zalora.MapHelper
 
   @doc """
-  Get product sets
+  Get list of product set
 
   Reference
 
