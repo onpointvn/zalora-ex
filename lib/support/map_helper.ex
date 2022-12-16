@@ -1,4 +1,6 @@
 defmodule Zalora.MapHelper do
+  alias Zalora.StringHelper
+
   @doc """
   Clean nil value from map/list recursively
 
@@ -45,18 +47,13 @@ defmodule Zalora.MapHelper do
   @doc """
   Convert map to request query
   """
-  def to_query(%Date{} = date) do
-    Date.to_iso8601(date)
-  end
+  def to_query(map) do
+    Enum.into(map, %{}, fn
+      {key, %Date{} = date} ->
+        {StringHelper.camelize(key), Date.to_iso8601(date)}
 
-  def to_query(values) when is_list(values) do
-    Enum.join(values, ",")
-  end
-
-  def to_query(map) when is_map(map) do
-    Enum.into(map, %{}, fn {key, value} ->
-      key = Zalora.StringHelper.camelize("#{key}")
-      {key, to_query(value)}
+      {key, value} ->
+        {StringHelper.camelize(key), value}
     end)
   end
 end
