@@ -4,6 +4,8 @@ defmodule Zalora.Product do
   @doc """
   Get list of product for a product set
 
+  Reference
+
   https://sellercenter-api.zalora.com.ph/docs/#/Product/get_v2_product_set__productSetId__products
   """
   @spec get_product_set_products(product_set_id :: integer(), opts :: Keyword.t()) ::
