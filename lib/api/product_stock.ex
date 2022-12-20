@@ -23,4 +23,32 @@ defmodule Zalora.ProductStock do
         error
     end
   end
+
+  @doc """
+  Update stock for a product
+
+  Reference
+
+  https://sellercenter-api.zalora.com.ph/docs/#/ProductStock/put_v2_stock_product
+  """
+  def update_product_stock(list_params, opts \\ []) do
+    opts = Keyword.put(opts, :use_json, true)
+
+    with {:ok, payload} when is_list(payload) <- {:ok, list_params},
+         {:ok, client} <- Client.new(opts) do
+
+      client
+      |> Client.put("/v2/stock/product", payload)
+      |> case do
+        {:ok, _} = result ->
+          result
+
+        {:ok, data} ->
+          {:error, data}
+
+        error ->
+          error
+      end
+    end
+  end
 end
