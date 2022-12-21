@@ -1,4 +1,5 @@
 defmodule Zalora.ProductStock do
+  alias Zalora.MapHelper
   alias Zalora.Client
 
   @doc """
@@ -31,16 +32,38 @@ defmodule Zalora.ProductStock do
 
   https://sellercenter-api.zalora.com.ph/docs/#/ProductStock/put_v2_stock_product
   """
-  def update_product_stock(list_params, opts \\ []) do
+  @stock_change_schema %{
+    product_id: [type: :integer, required: true],
+    quantity: [type: :integer, required: true, number: [min: 0]]
+  }
+  @spec update_product_stock(stock_changes :: list(map()), opts :: Keyword.t()) ::
+          {:ok, list(map())} | {:error, any()}
+  def update_product_stock(stock_changes, opts \\ []) do
     opts = Keyword.put(opts, :use_json, true)
 
-    with {:ok, payload} when is_list(payload) <- {:ok, list_params},
+    validation_result =
+      Enum.reduce_while(stock_changes, {:ok, []}, fn stock_change, {:ok, stock_changes_acc} ->
+        Contrak.validate(stock_change, @stock_change_schema)
+        |> case do
+          {:ok, stock_change} ->
+            {:cont, {:ok, [stock_change | stock_changes_acc]}}
+
+          error ->
+            {:halt, error}
+        end
+      end)
+
+    with {:ok, stock_changes} <- validation_result,
          {:ok, client} <- Client.new(opts) do
+      payload =
+        stock_changes
+        |> Enum.reverse()
+        |> Enum.map(&MapHelper.to_query(&1))
 
       client
       |> Client.put("/v2/stock/product", payload)
       |> case do
-        {:ok, _} = result ->
+        {:ok, product_stocks} = result when is_list(product_stocks) ->
           result
 
         {:ok, data} ->
