@@ -22,7 +22,7 @@ defmodule Zalora.ProductPrice do
       query =
         query
         |> MapHelper.clean_nil()
-        |> MapHelper.to_query()
+        |> MapHelper.to_request_data()
 
       client
       |> Client.get("/v2/prices", query: query)

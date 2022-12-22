@@ -112,7 +112,7 @@ defmodule Zalora.ProductSet do
       query =
         query
         |> MapHelper.clean_nil()
-        |> MapHelper.to_query()
+        |> MapHelper.to_request_data()
 
       client
       |> Client.get("/v2/product-sets", query: query)

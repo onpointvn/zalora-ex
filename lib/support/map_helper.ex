@@ -45,9 +45,9 @@ defmodule Zalora.MapHelper do
   def clean_nil(param), do: param
 
   @doc """
-  Convert map to request query
+  Convert map to request data
   """
-  def to_query(map) do
+  def to_request_data(map) do
     Enum.into(map, %{}, fn
       {key, %Date{} = date} ->
         {StringHelper.camelize(key), Date.to_iso8601(date)}
