@@ -1,5 +1,4 @@
 defmodule Zalora.ProductStock do
-  alias Zalora.MapHelper
   alias Zalora.Client
 
   @doc """
@@ -57,7 +56,7 @@ defmodule Zalora.ProductStock do
       payload =
         stock_changes
         |> Enum.reverse()
-        |> Enum.map(&MapHelper.to_request_data(&1))
+        |> Enum.map(&Zalora.MapHelper.to_request_data(&1))
 
       client
       |> Client.put("/v2/stock/product", payload)
