@@ -126,6 +126,7 @@ defmodule Zalora.Client do
     put(client, "/users", [%{name: "Jon"}])
     put(client, "/users", [%{name: "Jon"}], query: [scope: "admin"])
   """
+  @spec put(Tesla.Client.t(), String.t(), any(), keyword()) :: {:ok, any()} | {:error, any()}
   def put(client, path, body, opts \\ []) do
     client
     |> Tesla.put(path, body, [{:opts, [api_name: path]} | opts])
