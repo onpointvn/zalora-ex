@@ -39,11 +39,10 @@ defmodule Zalora.ProductStock do
   @spec update_product_stock(stock_changes :: list(map()), opts :: Keyword.t()) ::
           {:ok, list(map())} | {:error, any()}
   def update_product_stock(stock_changes, opts \\ []) do
-    opts = Keyword.put(opts, :use_json, true)
-
     validation_result =
       Enum.reduce_while(stock_changes, {:ok, []}, fn stock_change, {:ok, stock_changes_acc} ->
-        Contrak.validate(stock_change, @stock_change_schema)
+        stock_change
+        |> Contrak.validate(@stock_change_schema)
         |> case do
           {:ok, stock_change} ->
             {:cont, {:ok, [stock_change | stock_changes_acc]}}
@@ -58,7 +57,7 @@ defmodule Zalora.ProductStock do
       payload =
         stock_changes
         |> Enum.reverse()
-        |> Enum.map(&MapHelper.to_query(&1))
+        |> Enum.map(&MapHelper.to_request_data(&1))
 
       client
       |> Client.put("/v2/stock/product", payload)
