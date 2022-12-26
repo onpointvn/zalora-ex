@@ -107,7 +107,7 @@ defmodule Zalora.Client do
   """
   def handle_response(response) do
     case response do
-      {:ok, %{body: body, status: 200}} ->
+      {:ok, %{body: body, status: status}} when status in [200, 201] ->
         {:ok, body}
 
       {:ok, %{body: body}} ->
