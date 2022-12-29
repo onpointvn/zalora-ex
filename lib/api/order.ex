@@ -223,6 +223,7 @@ end
 
 defmodule Zalora.Order do
   alias Zalora.Client
+  alias Zalora.MapHelper
 
   @order_by_fields ["created_at", "updated_at"]
 
@@ -262,16 +263,25 @@ defmodule Zalora.Order do
     order_ids: {:array, :integer}
   }
   def get_orders(params, opts \\ []) do
-    # with {:ok, client} <- Client.new(opts),
-    #      {:ok, items} when is_list(items) <-
-    #        Client.get(client, "/v2/product-set/#{product_set_id}/products") do
-    #   {:ok, items}
-    # else
-    #   {:ok, data} ->
-    #     {:error, data}
+    with {:ok, query} <- Contrak.validate(params, @get_orders_schema),
+         {:ok, client} <- Client.new(opts) do
+      query =
+        query
+        |> MapHelper.clean_nil()
+        |> MapHelper.to_request_data()
 
-    #   error ->
-    #     error
-    # end
+      client
+      |> Client.get("/v2/orders", query: query)
+      |> case do
+        {:ok, %{"items" => _, "pagination" => _}} = result ->
+          result
+
+        {:ok, data} ->
+          {:error, data}
+
+        error ->
+          error
+      end
+    end
   end
 end
