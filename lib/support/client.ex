@@ -119,6 +119,21 @@ defmodule Zalora.Client do
   end
 
   @doc """
+  Perform a PUT request.
+
+    put("/users", [%{name: "Jon"}])
+    put("/users", [%{name: "Jon"}], query: [scope: "admin"])
+    put(client, "/users", [%{name: "Jon"}])
+    put(client, "/users", [%{name: "Jon"}], query: [scope: "admin"])
+  """
+  @spec put(Tesla.Client.t(), String.t(), any(), keyword()) :: {:ok, any()} | {:error, any()}
+  def put(client, path, body, opts \\ []) do
+    client
+    |> Tesla.put(path, body, [{:opts, [api_name: path]} | opts])
+    |> process()
+  end
+
+  @doc """
   Perform a POST request.
 
     post("/users", %{name: "Jon"})
