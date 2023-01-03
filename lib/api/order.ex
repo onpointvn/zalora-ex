@@ -406,9 +406,9 @@ defmodule Zalora.Order do
     delivery_type: [type: :string, in: Zalora.Order.OrderDeliveryType.enum()],
     shipping_provider: :string,
     tracking_number: [type: :string, required: true],
-    accessKey: :string,
-    documentUrl: :string,
-    invoiceEncodedXml: :string
+    access_key: :string,
+    document_url: :string,
+    invoice_encoded_xml: :string
   }
   def ready_to_ship(params, opts \\ []) do
     with {:ok, body} <- Contrak.validate(params, @ready_to_ship_schema),
