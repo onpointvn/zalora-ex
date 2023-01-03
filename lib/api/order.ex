@@ -247,6 +247,14 @@ defmodule Zalora.Order.OrderDocumentType do
     ]
 end
 
+defmodule Zalora.Order.OrderDeliveryType do
+  def dropship, do: "dropship"
+  def pickup, do: "pickup"
+  def send_to_warehouse, do: "send_to_warehouse"
+
+  def enum, do: [dropship(), pickup(), send_to_warehouse()]
+end
+
 defmodule Zalora.Order do
   alias Zalora.Client
   alias Zalora.MapHelper
@@ -319,7 +327,7 @@ defmodule Zalora.Order do
   """
   @order_items_param %{
     order_item_id: [type: :integer, required: true],
-    serialNumber: :string
+    serial_number: :string
   }
   @pack_order_schema %{
     order_items: [type: @order_items_param, required: true],
@@ -372,6 +380,48 @@ defmodule Zalora.Order do
       |> Client.post("v2/orders/export-document", body)
       |> case do
         {:ok, %{"id" => _, "sellerId" => _, "exportContent" => _}} = result ->
+          result
+
+        {:ok, data} ->
+          {:error, data}
+
+        error ->
+          error
+      end
+    end
+  end
+
+  @doc """
+  Set to ready to ship
+
+  Reference
+  https://sellercenter-api.zalora.com.ph/docs/#/Orders/post_v2_orders_statuses_set_to_ready_to_ship
+  """
+  @order_items_schema %{
+    id: [type: :integer, required: true],
+    serial_number: :string
+  }
+  @ready_to_ship_schema %{
+    order_items: [type: @order_items_schema, required: true],
+    delivery_type: [type: :string, in: Zalora.Order.OrderDeliveryType.enum()],
+    shipping_provider: :string,
+    tracking_number: [type: :string, required: true],
+    accessKey: :string,
+    documentUrl: :string,
+    invoiceEncodedXml: :string
+  }
+  def ready_to_ship(params, opts \\ []) do
+    with {:ok, body} <- Contrak.validate(params, @ready_to_ship_schema),
+         {:ok, client} <- Client.new(opts) do
+      body =
+        body
+        |> MapHelper.clean_nil()
+        |> MapHelper.to_request_data()
+
+      client
+      |> Client.post("v2/orders/statuses/set-to-ready-to-ship", body)
+      |> case do
+        {:ok, %{"orderItemIds" => _}} = result ->
           result
 
         {:ok, data} ->
