@@ -330,7 +330,7 @@ defmodule Zalora.Order do
     serial_number: :string
   }
   @pack_order_schema %{
-    order_items: [type: @order_items_param, required: true],
+    order_items: [type: {:array, @order_items_param}, required: true],
     delivery_type: [type: :string, required: true],
     shipping_provider: :string,
     tracking_number: :string
@@ -402,7 +402,7 @@ defmodule Zalora.Order do
     serial_number: :string
   }
   @ready_to_ship_schema %{
-    order_items: [type: @order_items_schema, required: true],
+    order_items: [type: {:array, @order_items_schema}, required: true],
     delivery_type: [type: :string, in: Zalora.Order.OrderDeliveryType.enum()],
     shipping_provider: :string,
     tracking_number: [type: :string, required: true],
