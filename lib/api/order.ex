@@ -432,4 +432,34 @@ defmodule Zalora.Order do
       end
     end
   end
+
+  @doc """
+  Set tracking number
+
+  Reference
+  https://sellercenter-api.zalora.com.ph/docs/#/Orders/post_v2_order_item_tracking_code
+  """
+  @tracking_code_schema %{
+    orderItemId: [type: :integer, required: true],
+    trackingCode: [type: :string, required: true]
+  }
+  def set_tracking_code(params, opts \\ []) do
+    with {:ok, body} <- Contrak.validate(params, @tracking_code_schema),
+         {:ok, client} <- Client.new(opts) do
+      body =
+        body
+        |> MapHelper.clean_nil()
+        |> MapHelper.to_request_data()
+
+      client
+      |> Client.post("v2/order-item/tracking-code", body)
+      |> case do
+        {:ok, _} = result ->
+          result
+
+        error ->
+          error
+      end
+    end
+  end
 end
