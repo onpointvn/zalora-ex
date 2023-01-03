@@ -440,8 +440,8 @@ defmodule Zalora.Order do
   https://sellercenter-api.zalora.com.ph/docs/#/Orders/post_v2_order_item_tracking_code
   """
   @tracking_code_schema %{
-    orderItemId: [type: :integer, required: true],
-    trackingCode: [type: :string, required: true]
+    order_item_id: [type: :integer, required: true],
+    tracking_code: [type: :string, required: true]
   }
   def set_tracking_code(params, opts \\ []) do
     with {:ok, body} <- Contrak.validate(params, @tracking_code_schema),
