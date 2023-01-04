@@ -230,14 +230,19 @@ defmodule Zalora.Order.OrderDocumentType do
   """
 
   def invoice, do: "invoice"
+
   def export_invoice, do: "exportInvoice"
+
   def shipping_label, do: "shippingLabel"
+
   def shipping_parcel, do: "shippingParcel"
+
   def carrier_manifest, do: "carrierManifest"
+
   def serial_number, do: "serialNumber"
 
-  def enum,
-    do: [
+  def enum do
+    [
       invoice(),
       export_invoice(),
       shipping_label(),
@@ -245,14 +250,23 @@ defmodule Zalora.Order.OrderDocumentType do
       carrier_manifest(),
       serial_number()
     ]
+  end
 end
 
 defmodule Zalora.Order.OrderDeliveryType do
   def dropship, do: "dropship"
+
   def pickup, do: "pickup"
+
   def send_to_warehouse, do: "send_to_warehouse"
 
-  def enum, do: [dropship(), pickup(), send_to_warehouse()]
+  def enum do
+    [
+      dropship(),
+      pickup(),
+      send_to_warehouse()
+    ]
+  end
 end
 
 defmodule Zalora.Order do
