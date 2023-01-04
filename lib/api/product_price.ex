@@ -13,7 +13,7 @@ defmodule Zalora.ProductPrice do
     product_set_ids: [type: {:array, :integer}, required: true]
   }
   @spec get_product_prices(params :: map(), opts :: Keyword.t()) ::
-          {:ok, map()} | {:error, map()} | {:error, any()}
+          {:ok, list(map())} | {:error, map()} | {:error, any()}
   def get_product_prices(params, opts \\ []) do
     params = MapHelper.clean_nil(params)
 
