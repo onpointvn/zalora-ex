@@ -226,6 +226,7 @@ defmodule Zalora.Order.OrderDocumentType do
   Enumeration for export an order document in PDF format
 
   Reference
+
   https://sellercenter-api.zalora.com.ph/docs/#/Orders/post_v2_orders_export_document
   """
 
@@ -379,7 +380,7 @@ defmodule Zalora.Order do
   https://sellercenter-api-staging.zalora.com.ph/docs/#/Orders/post_v2_orders_export_document
   """
   @export_document_schema %{
-    order_ids: [type: {:array, :integer}, required: true],
+    order_ids: [type: {:array, :integer}, required: true, length: [min: 1]],
     document_type: [type: :string, in: Zalora.Order.OrderDocumentType.enum(), required: true]
   }
   def export_document(params, opts \\ []) do
@@ -411,12 +412,13 @@ defmodule Zalora.Order do
   Reference
   https://sellercenter-api.zalora.com.ph/docs/#/Orders/post_v2_orders_statuses_set_to_ready_to_ship
   """
-  @order_items_schema %{
+  @ready_to_ship_items_schema %{
     id: [type: :integer, required: true],
     serial_number: :string
   }
+
   @ready_to_ship_schema %{
-    order_items: [type: {:array, @order_items_schema}, required: true],
+    order_items: [type: {:array, @ready_to_ship_items_schema}, required: true],
     delivery_type: [type: :string, in: Zalora.Order.OrderDeliveryType.enum()],
     shipping_provider: :string,
     tracking_number: [type: :string, required: true],
