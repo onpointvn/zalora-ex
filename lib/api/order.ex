@@ -221,6 +221,55 @@ defmodule Zalora.Order.FulfillmentType do
   end
 end
 
+defmodule Zalora.Order.OrderDocumentType do
+  @moduledoc """
+  Enumeration for export an order document in PDF format
+
+  Reference
+
+  https://sellercenter-api.zalora.com.ph/docs/#/Orders/post_v2_orders_export_document
+  """
+
+  def invoice, do: "invoice"
+
+  def export_invoice, do: "exportInvoice"
+
+  def shipping_label, do: "shippingLabel"
+
+  def shipping_parcel, do: "shippingParcel"
+
+  def carrier_manifest, do: "carrierManifest"
+
+  def serial_number, do: "serialNumber"
+
+  def enum do
+    [
+      invoice(),
+      export_invoice(),
+      shipping_label(),
+      shipping_parcel(),
+      carrier_manifest(),
+      serial_number()
+    ]
+  end
+end
+
+defmodule Zalora.Order.OrderDeliveryType do
+  def dropship, do: "dropship"
+
+  def pickup, do: "pickup"
+
+  def send_to_warehouse, do: "send_to_warehouse"
+
+  def enum do
+    [
+      dropship(),
+      pickup(),
+      send_to_warehouse()
+    ]
+  end
+end
+
 defmodule Zalora.Order do
   alias Zalora.Client
   alias Zalora.MapHelper
@@ -278,6 +327,151 @@ defmodule Zalora.Order do
 
         {:ok, data} ->
           {:error, data}
+
+        error ->
+          error
+      end
+    end
+  end
+
+  @doc """
+  Pack order
+
+  Reference
+  https://sellercenter-api.zalora.com.ph/docs/#/Orders/post_v2_orders_statuses_set_to_packed_by_marketplace
+  """
+  @order_items_param %{
+    order_item_id: [type: :integer, required: true],
+    serial_number: :string
+  }
+  @pack_order_schema %{
+    order_items: [type: {:array, @order_items_param}, required: true],
+    delivery_type: [type: :string, required: true],
+    shipping_provider: :string,
+    tracking_number: :string
+  }
+  def pack_order(params, opts \\ []) do
+    with {:ok, body} <- Contrak.validate(params, @pack_order_schema),
+         {:ok, client} <- Client.new(opts) do
+      body =
+        body
+        |> MapHelper.clean_nil()
+        |> MapHelper.to_request_data()
+
+      client
+      |> Client.post("v2/orders/statuses/set-to-packed-by-marketplace", body)
+      |> case do
+        {:ok, %{"orderItemIds" => _}} = result ->
+          result
+
+        {:ok, data} ->
+          {:error, data}
+
+        error ->
+          error
+      end
+    end
+  end
+
+  @doc """
+  Export order document
+
+  Reference
+  https://sellercenter-api-staging.zalora.com.ph/docs/#/Orders/post_v2_orders_export_document
+  """
+  @export_document_schema %{
+    order_ids: [type: {:array, :integer}, required: true, length: [min: 1]],
+    document_type: [type: :string, in: Zalora.Order.OrderDocumentType.enum(), required: true]
+  }
+  def export_document(params, opts \\ []) do
+    with {:ok, body} <- Contrak.validate(params, @export_document_schema),
+         {:ok, client} <- Client.new(opts) do
+      body =
+        body
+        |> MapHelper.clean_nil()
+        |> MapHelper.to_request_data()
+
+      client
+      |> Client.post("v2/orders/export-document", body)
+      |> case do
+        {:ok, %{"id" => _, "sellerId" => _, "exportContent" => _}} = result ->
+          result
+
+        {:ok, data} ->
+          {:error, data}
+
+        error ->
+          error
+      end
+    end
+  end
+
+  @doc """
+  Set to ready to ship
+
+  Reference
+  https://sellercenter-api.zalora.com.ph/docs/#/Orders/post_v2_orders_statuses_set_to_ready_to_ship
+  """
+  @ready_to_ship_items_schema %{
+    id: [type: :integer, required: true],
+    serial_number: :string
+  }
+
+  @ready_to_ship_schema %{
+    order_items: [type: {:array, @ready_to_ship_items_schema}, required: true],
+    delivery_type: [type: :string, in: Zalora.Order.OrderDeliveryType.enum()],
+    shipping_provider: :string,
+    tracking_number: [type: :string, required: true],
+    access_key: :string,
+    document_url: :string,
+    invoice_encoded_xml: :string
+  }
+  def ready_to_ship(params, opts \\ []) do
+    with {:ok, body} <- Contrak.validate(params, @ready_to_ship_schema),
+         {:ok, client} <- Client.new(opts) do
+      body =
+        body
+        |> MapHelper.clean_nil()
+        |> MapHelper.to_request_data()
+
+      client
+      |> Client.post("v2/orders/statuses/set-to-ready-to-ship", body)
+      |> case do
+        {:ok, %{"orderItemIds" => _}} = result ->
+          result
+
+        {:ok, data} ->
+          {:error, data}
+
+        error ->
+          error
+      end
+    end
+  end
+
+  @doc """
+  Set tracking number
+
+  Reference
+  https://sellercenter-api.zalora.com.ph/docs/#/Orders/post_v2_order_item_tracking_code
+  """
+  @tracking_code_schema %{
+    order_item_id: [type: :integer, required: true],
+    tracking_code: [type: :string, required: true]
+  }
+  def set_tracking_code(params, opts \\ []) do
+    with {:ok, body} <- Contrak.validate(params, @tracking_code_schema),
+         {:ok, client} <- Client.new(opts) do
+      body =
+        body
+        |> MapHelper.clean_nil()
+        |> MapHelper.to_request_data()
+
+      client
+      |> Client.post("v2/order-item/tracking-code", body)
+      |> case do
+        {:ok, _} = result ->
+          result
 
         error ->
           error

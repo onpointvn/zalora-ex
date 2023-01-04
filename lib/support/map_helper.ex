@@ -47,13 +47,19 @@ defmodule Zalora.MapHelper do
   @doc """
   Convert map to request data
   """
-  def to_request_data(map) do
-    Enum.into(map, %{}, fn
-      {key, %Date{} = date} ->
-        {StringHelper.camelize(key), Date.to_iso8601(date)}
+  def to_request_data(items) when is_list(items) do
+    Enum.map(items, &to_request_data(&1))
+  end
 
-      {key, value} ->
-        {StringHelper.camelize(key), value}
+  def to_request_data(%Date{} = date), do: Date.to_iso8601(date)
+
+  def to_request_data(%DateTime{} = time), do: DateTime.to_iso8601(time)
+
+  def to_request_data(map) when is_map(map) do
+    Enum.into(map, %{}, fn {key, value} ->
+      {StringHelper.camelize(key), to_request_data(value)}
     end)
   end
+
+  def to_request_data(value), do: value
 end
