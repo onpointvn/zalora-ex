@@ -52,6 +52,9 @@ defmodule Zalora.MapHelper do
       {key, %Date{} = date} ->
         {StringHelper.camelize(key), Date.to_iso8601(date)}
 
+      {key, value} when is_map(value) ->
+        {StringHelper.camelize(key), to_request_data(value)}
+
       {key, value} ->
         {StringHelper.camelize(key), value}
     end)
