@@ -460,22 +460,22 @@ defmodule Zalora.Order do
   Reference
   https://sellercenter-api.zalora.com.ph/docs/#/Orders/post_v2_orders_statuses_set_to_ready_to_ship
   """
-  @ready_to_ship_items_schema %{
+  @set_to_ready_to_ship_item_schema %{
     id: [type: :integer, required: true],
     serial_number: :string
   }
 
-  @ready_to_ship_schema %{
-    order_items: [type: {:array, @ready_to_ship_items_schema}, required: true],
+  @set_to_ready_to_ship_schema %{
+    order_items: [type: {:array, @set_to_ready_to_ship_item_schema}, required: true],
+    tracking_number: [type: :string, required: true],
     delivery_type: [type: :string, in: Zalora.Order.OrderDeliveryType.enum()],
     shipping_provider: :string,
-    tracking_number: [type: :string, required: true],
     access_key: :string,
     document_url: :string,
     invoice_encoded_xml: :string
   }
-  def ready_to_ship(params, opts \\ []) do
-    with {:ok, body} <- Contrak.validate(params, @ready_to_ship_schema),
+  def set_to_ready_to_ship(params, opts \\ []) do
+    with {:ok, body} <- Contrak.validate(params, @set_to_ready_to_ship_schema),
          {:ok, client} <- Client.new(opts) do
       body =
         body
