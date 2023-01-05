@@ -9,7 +9,7 @@ defmodule Zalora.ProductStock do
   https://sellercenter-api.zalora.com.ph/docs/#/ProductStock/get_v2_stock_product__productId_
   """
   @spec get_product_stock(product_id :: integer(), opts :: Keyword.t()) ::
-          {:ok, list(map())} | {:error, any()}
+          {:ok, map()} | {:error, any()}
   def get_product_stock(product_id, opts \\ []) do
     with {:ok, client} <- Client.new(opts),
          {:ok, %{"sellerSku" => _} = produck_stock} <-
