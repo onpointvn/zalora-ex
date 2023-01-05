@@ -440,24 +440,17 @@ defmodule Zalora.Order do
   }
   def export_document(params, opts \\ []) do
     with {:ok, body} <- Contrak.validate(params, @export_document_schema),
-         {:ok, client} <- Client.new(opts) do
-      body =
-        body
-        |> MapHelper.clean_nil()
-        |> MapHelper.to_request_data()
+         body <- MapHelper.to_request_data(body),
+         {:ok, client} <- Client.new(opts),
+         {:ok, %{"id" => _, "sellerId" => _, "exportContent" => _}} = result <-
+           Client.post(client, "v2/orders/export-document", body) do
+      result
+    else
+      {:ok, data} ->
+        {:error, data}
 
-      client
-      |> Client.post("v2/orders/export-document", body)
-      |> case do
-        {:ok, %{"id" => _, "sellerId" => _, "exportContent" => _}} = result ->
-          result
-
-        {:ok, data} ->
-          {:error, data}
-
-        error ->
-          error
-      end
+      error ->
+        error
     end
   end
 
