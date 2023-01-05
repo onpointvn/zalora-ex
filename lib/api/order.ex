@@ -346,7 +346,7 @@ defmodule Zalora.Order do
   }
   @pack_order_schema %{
     order_items: [type: {:array, @order_items_param}, required: true],
-    delivery_type: [type: :string, required: true],
+    delivery_type: [type: :string, required: true, in: Zalora.Order.OrderDeliveryType.enum()],
     shipping_provider: :string,
     tracking_number: :string
   }
