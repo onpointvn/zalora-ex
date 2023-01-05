@@ -340,12 +340,13 @@ defmodule Zalora.Order do
   Reference
   https://sellercenter-api.zalora.com.ph/docs/#/Orders/post_v2_orders_statuses_set_to_packed_by_marketplace
   """
-  @order_items_param %{
+  @packed_order_item_schema %{
     order_item_id: [type: :integer, required: true],
     serial_number: :string
   }
+
   @pack_order_schema %{
-    order_items: [type: {:array, @order_items_param}, required: true],
+    order_items: [type: {:array, @packed_order_item_schema}, required: true],
     delivery_type: [type: :string, required: true, in: Zalora.Order.OrderDeliveryType.enum()],
     shipping_provider: :string,
     tracking_number: :string
