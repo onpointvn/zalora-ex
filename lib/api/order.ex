@@ -335,24 +335,24 @@ defmodule Zalora.Order do
   end
 
   @doc """
-  Pack order
+  Set orders items statuses to "packed by marketplace"
 
   Reference
   https://sellercenter-api.zalora.com.ph/docs/#/Orders/post_v2_orders_statuses_set_to_packed_by_marketplace
   """
-  @packed_order_item_schema %{
+  @set_to_packed_by_marketplace_order_item_schema %{
     order_item_id: [type: :integer, required: true],
     serial_number: :string
   }
 
-  @pack_order_schema %{
-    order_items: [type: {:array, @packed_order_item_schema}, required: true],
+  @set_to_packed_by_marketplace_schema %{
+    order_items: [type: {:array, @set_to_packed_by_marketplace_order_item_schema}, required: true],
     delivery_type: [type: :string, required: true, in: Zalora.Order.OrderDeliveryType.enum()],
     shipping_provider: :string,
     tracking_number: :string
   }
-  def pack_order(params, opts \\ []) do
-    with {:ok, body} <- Contrak.validate(params, @pack_order_schema),
+  def set_to_packed_by_marketplace(params, opts \\ []) do
+    with {:ok, body} <- Contrak.validate(params, @set_to_packed_by_marketplace_schema),
          {:ok, client} <- Client.new(opts) do
       body =
         body
