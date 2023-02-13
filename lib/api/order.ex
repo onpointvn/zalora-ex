@@ -274,6 +274,31 @@ defmodule Zalora.Order do
   alias Zalora.Client
   alias Zalora.MapHelper
 
+  @doc """
+
+  https://sellercenter-api.zalora.com.ph/docs/#/Orders/GET_v2-orders-order
+  """
+  @get_order_schema %{
+    order_id: [type: :integer, required: true]
+  }
+  def get_order(params, opts \\ []) do
+    with {:ok, params} <- Contrak.validate(params, @get_order_schema),
+         {:ok, client} <- Client.new(opts) do
+      client
+      |> Client.get("/v2/orders/#{params.order_id}")
+      |> case do
+        {:ok, %{"id" => _, "number" => _, "statusList" => _}} = result ->
+          result
+
+        {:ok, data} ->
+          {:error, data}
+
+        error ->
+          error
+      end
+    end
+  end
+
   @order_by_fields ["created_at", "updated_at"]
 
   @order_directions ["asc", "desc"]
