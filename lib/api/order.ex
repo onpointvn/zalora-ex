@@ -551,4 +551,53 @@ defmodule Zalora.Order do
       end
     end
   end
+
+  @doc """
+  Get Shipping Label - V1
+
+  Reference
+  https://sellerapi.sellercenter.net/reference/getdocument
+  """
+  @get_shipping_label_schema %{
+    order_item_ids: [type: :string, required: true],
+    email: [type: :string, required: true],
+    timestamp: [type: :string, required: true],
+    api_key: [type: :string, required: true]
+  }
+  def get_shipping_label(params, opts \\ []) do
+    with {:ok, body} <- Contrak.validate(params, @get_shipping_label_schema),
+         {:ok, client} <- Client.new(opts) do
+      body =
+        body
+        |> MapHelper.clean_nil()
+        |> MapHelper.to_request_data()
+
+      query_params = %{
+        "UserID" => body["email"],
+        "Version" => "1.0",
+        "Action" => "GetDocument",
+        "DocumentType" => "shippingLabel",
+        "Timestamp" => body["timestamp"],
+        "OrderItemIds" => body["orderItemIds"],
+      }
+
+      encoded_url = URI.encode_query(query_params)
+
+      signature =
+        :crypto.mac(:hmac, :sha256, body["apiKey"], encoded_url)
+        |> Base.encode16(case: :lower)
+
+      url = "?" <> encoded_url <> "&Signature=#{signature}"
+
+      client
+      |> Client.get(url)
+      |> case do
+        {:ok, _} = result ->
+          result
+
+        error ->
+          error
+      end
+    end
+  end
 end
