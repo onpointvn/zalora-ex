@@ -2,6 +2,9 @@ defmodule Zalora.PaymentMethod do
   alias Zalora.Client
 
   @doc """
+  Get all payment methods
+
+  Reference
 
   https://sellercenter-api.zalora.com.ph/docs/#/Payment%20Method/get_v2_payment_methods
   """
