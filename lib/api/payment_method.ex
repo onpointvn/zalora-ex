@@ -11,16 +11,12 @@ defmodule Zalora.PaymentMethod do
   @spec get_payment_methods(opts :: Keyword.t()) ::
           {:ok, list(map())} | {:error, any()}
   def get_payment_methods(opts \\ []) do
-    with {:ok, client} <- Client.new(opts) do
-      client
-      |> Client.get("/v2/payment-methods")
-      |> case do
-        {:ok, _} = result ->
-          result
+    case Client.new(opts) do
+      {:ok, client} ->
+        Client.get(client, "/v2/payment-methods")
 
-        error ->
-          error
-      end
+      error ->
+        error
     end
   end
 end
